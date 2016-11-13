@@ -1,0 +1,6 @@
+framework module Pods_XJRefreshTest {
+  umbrella header "Pods-XJRefreshTest-umbrella.h"
+
+  export *
+  module * { export * }
+}
