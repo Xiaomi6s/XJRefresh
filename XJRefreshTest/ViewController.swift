@@ -10,16 +10,9 @@ import UIKit
 import SnapKit
 class ViewController: UIViewController {
 
-//   lazy var tableView: UITableView = {
-//        let table = UITableView(frame: CGRect.zero, style: .plain)
-//        table.dataSource = self
-//        table.delegate = self
-//        return table
-//    }()
     @IBOutlet weak var table: UITableView!
     override func viewDidLoad() {
         super.viewDidLoad()
-//        view.addSubview(tableView)
         addrefresh()
         table.refreshHeader?.beginRefresh()
         
