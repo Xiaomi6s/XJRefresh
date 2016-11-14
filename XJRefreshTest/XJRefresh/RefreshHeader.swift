@@ -77,6 +77,23 @@ class RefreshHeader: UIView {
         addConstraintForSubView()
     }
     
+    private func addConstraintForSubView() {
+        arrowImgView.snp.makeConstraints { (make) in
+            make.right.equalTo(stateLabel.snp.left).offset(-10)
+            make.top.equalTo(self).offset(10)
+            make.height.equalTo(40)
+            make.width.equalTo(15)
+        }
+        stateLabel.snp.makeConstraints { (make) in
+            make.centerY.equalTo(arrowImgView)
+            make.centerX.equalToSuperview()
+        }
+        activityIndicator.snp.makeConstraints { (make) in
+            make.center.equalTo(arrowImgView)
+            make.width.height.equalTo(20)
+        }
+    }
+    
     //添加oberver
     private func addoberver() {
         scrollView?.addObserver(self, forKeyPath: contentOffsetKey, options: .new, context: nil)
@@ -135,23 +152,6 @@ class RefreshHeader: UIView {
             }
         }
     }
-    private func addConstraintForSubView() {
-        arrowImgView.snp.makeConstraints { (make) in
-            make.right.equalTo(stateLabel.snp.left).offset(-10)
-            make.top.equalTo(self).offset(10)
-            make.height.equalTo(40)
-            make.width.equalTo(15)
-        }
-        stateLabel.snp.makeConstraints { (make) in
-            make.centerY.equalTo(arrowImgView)
-            make.centerX.equalToSuperview()
-        }
-        activityIndicator.snp.makeConstraints { (make) in
-            make.center.equalTo(arrowImgView)
-            make.width.height.equalTo(20)
-        }
-    }
-    
     //改变title
     private func updateTitle() {
         switch state {
