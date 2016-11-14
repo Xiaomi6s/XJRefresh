@@ -22,10 +22,17 @@ class ViewController: UIViewController {
             table.addHeaderRefresh {
             self.perform(#selector(self.stopRefresh), with: self, afterDelay: 2)
         }
+        table.addFooterRefresh {
+             self.perform(#selector(self.footerstop), with: self, afterDelay: 2)
+        }
     }
     
     func stopRefresh() {
         table.refreshHeader?.endRefresh()
+       
+    }
+    func footerstop() {
+         table.refreshFooter?.endRefresh()
     }
 
     override func didReceiveMemoryWarning() {
@@ -46,7 +53,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
         return 2
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 6
+        return 16
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellIdentifier = "cell"
