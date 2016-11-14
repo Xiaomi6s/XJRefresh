@@ -33,6 +33,7 @@ extension UIScrollView {
     
     open override class func initialize() {
     
+        //保证只能执行一次
         DispatchQueue.once(token: "initialize", closure: {
             let method1 = class_getInstanceMethod(self, #selector(xjdeaclloc))
             let method2 = class_getInstanceMethod(self, NSSelectorFromString("dealloc"))
@@ -44,7 +45,7 @@ extension UIScrollView {
         if self.refreshHeader != nil {
             self.removeObserver(self.refreshHeader!, forKeyPath: contentOffsetKey) // 移除观察者
             self.refreshHeader?.removeFromSuperview()
-            self.refreshHeader = nil
+            self.refreshHeader = nil //保证refreshHeader正常释放
         }
         xjdeaclloc()
     }
