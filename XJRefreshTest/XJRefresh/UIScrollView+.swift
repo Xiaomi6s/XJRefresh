@@ -9,6 +9,8 @@
 import Foundation
 import UIKit
 
+fileprivate let contentOffsetKey = "contentOffset"
+fileprivate let contentSizeKey = "contentSize"
 
 var  RefreshHeaderKey: Void?
 var  RefreshFooterKey: Void?
@@ -58,15 +60,16 @@ extension UIScrollView {
     }
     func xjdeaclloc() {
         if refreshHeader != nil {
-            removeObserver(self.refreshHeader!, forKeyPath: contentOffsetKey) // 移除观察者
+            removeObserver(refreshHeader!, forKeyPath: contentOffsetKey) // 移除观察者
+            removeObserver(refreshHeader!, forKeyPath: contentSizeKey) // 移除观察者
             refreshHeader?.removeFromSuperview()
             refreshHeader = nil //保证refreshHeader正常释放
         }
         if refreshFooter != nil {
-            removeObserver(self.refreshFooter!, forKeyPath: contentOffsetKey) // 移除观察者
-            removeObserver(self.refreshFooter!, forKeyPath: "contentSize") // 移除观察者
+            removeObserver(refreshFooter!, forKeyPath: contentOffsetKey) // 移除观察者
+            removeObserver(refreshFooter!, forKeyPath: contentSizeKey) // 移除观察者
             refreshFooter?.removeFromSuperview()
-            refreshFooter = nil //保证refreshHeader正常释放
+            refreshFooter = nil //保证refreshFooter正常释放
         }
         xjdeaclloc()
     }

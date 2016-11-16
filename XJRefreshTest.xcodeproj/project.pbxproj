@@ -18,6 +18,10 @@
 		D70FD69F1DD857A80081747D /* NextVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70FD69D1DD857A80081747D /* NextVC.swift */; };
 		D70FD6A01DD857A80081747D /* NextVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = D70FD69E1DD857A80081747D /* NextVC.xib */; };
 		D72A0B671DD95D1B00A33407 /* RefreshFooter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A0B661DD95D1B00A33407 /* RefreshFooter.swift */; };
+		D7FF96E31DDC364B005D7985 /* TestCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF96E01DDC364B005D7985 /* TestCell.swift */; };
+		D7FF96E41DDC364B005D7985 /* TestCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = D7FF96E11DDC364B005D7985 /* TestCell.xib */; };
+		D7FF96E51DDC364B005D7985 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF96E21DDC364B005D7985 /* User.swift */; };
+		D7FF96E71DDC366F005D7985 /* ReFreshBasicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF96E61DDC366F005D7985 /* ReFreshBasicView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +40,10 @@
 		D70FD69D1DD857A80081747D /* NextVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NextVC.swift; sourceTree = "<group>"; };
 		D70FD69E1DD857A80081747D /* NextVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NextVC.xib; sourceTree = "<group>"; };
 		D72A0B661DD95D1B00A33407 /* RefreshFooter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RefreshFooter.swift; sourceTree = "<group>"; };
+		D7FF96E01DDC364B005D7985 /* TestCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestCell.swift; sourceTree = "<group>"; };
+		D7FF96E11DDC364B005D7985 /* TestCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TestCell.xib; sourceTree = "<group>"; };
+		D7FF96E21DDC364B005D7985 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		D7FF96E61DDC366F005D7985 /* ReFreshBasicView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReFreshBasicView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +101,9 @@
 				D70FD6881DD8029B0081747D /* ViewController.swift */,
 				D70FD69D1DD857A80081747D /* NextVC.swift */,
 				D70FD69E1DD857A80081747D /* NextVC.xib */,
+				D7FF96E01DDC364B005D7985 /* TestCell.swift */,
+				D7FF96E11DDC364B005D7985 /* TestCell.xib */,
+				D7FF96E21DDC364B005D7985 /* User.swift */,
 				D70FD68A1DD8029B0081747D /* Main.storyboard */,
 				D70FD68D1DD8029B0081747D /* Assets.xcassets */,
 				D70FD68F1DD8029C0081747D /* LaunchScreen.storyboard */,
@@ -105,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				D70FD6991DD805D90081747D /* UIScrollView+.swift */,
+				D7FF96E61DDC366F005D7985 /* ReFreshBasicView.swift */,
 				D70FD69B1DD806260081747D /* RefreshHeader.swift */,
 				D72A0B661DD95D1B00A33407 /* RefreshFooter.swift */,
 			);
@@ -178,6 +190,7 @@
 				D70FD6911DD8029C0081747D /* LaunchScreen.storyboard in Resources */,
 				D70FD68E1DD8029C0081747D /* Assets.xcassets in Resources */,
 				D70FD68C1DD8029B0081747D /* Main.storyboard in Resources */,
+				D7FF96E41DDC364B005D7985 /* TestCell.xib in Resources */,
 				D70FD6A01DD857A80081747D /* NextVC.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -237,9 +250,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7FF96E71DDC366F005D7985 /* ReFreshBasicView.swift in Sources */,
+				D7FF96E31DDC364B005D7985 /* TestCell.swift in Sources */,
 				D70FD69A1DD805D90081747D /* UIScrollView+.swift in Sources */,
 				D70FD6891DD8029B0081747D /* ViewController.swift in Sources */,
 				D70FD69C1DD806260081747D /* RefreshHeader.swift in Sources */,
+				D7FF96E51DDC364B005D7985 /* User.swift in Sources */,
 				D70FD69F1DD857A80081747D /* NextVC.swift in Sources */,
 				D72A0B671DD95D1B00A33407 /* RefreshFooter.swift in Sources */,
 				D70FD6871DD8029B0081747D /* AppDelegate.swift in Sources */,

@@ -8,101 +8,53 @@
 
 import UIKit
 
-enum RefreshState {
-    case pullToRefresh      //下拉刷新（闲置状态）
-    case releaseToRefresh   //松开即可刷新
-    case loading            //正在刷新
-}
+fileprivate let contentOffsetKey = "contentOffset"
+fileprivate let contentSizeKey = "contentSize"
+private let timeInterval = 0.25 //动画时间
 
-let contentOffsetKey = "contentOffset"
-let timeInterval = 0.25
-
-class RefreshHeader: UIView {
+class RefreshHeader: ReFreshBasicView {
     
     var pullDownToRefreshText = "下拉刷新"
     var releaseToRefreshText = "松开刷新"
     var loadingText = "正在加载..."
     
-    weak var scrollView: UIScrollView? {
-        didSet{
-            scrollView?.addSubview(self)
-        }
-    }
-    private var state: RefreshState = .pullToRefresh {
+    fileprivate var state: RefreshState = .pullToRefresh {
         didSet{
             if oldValue != state {
                 handleState()
             }
         }
     }
-    private  var refreshClosure: RefreshClosure?
-    private  var refreshHeight: CGFloat
-    private  var stateLabel: UILabel!
-    private  var arrowImgView: UIImageView!
-    private  var activityIndicator: UIActivityIndicatorView!
     override init(frame: CGRect) {
-        refreshHeight = frame.height
         super.init(frame: frame)
-        setupUI()
+        stateLabel.text = pullDownToRefreshText
         
     }
+    
     deinit {
         print("RefreshHeader deinit")
         
     }
-    
     override func willMove(toSuperview newSuperview: UIView?) {
         super.willMove(toSuperview: newSuperview)
         if newSuperview is UIScrollView {
             addoberver()
         }
     }
-    
-    private func setupUI() {
-        
-        stateLabel = UILabel()
-        stateLabel.font = UIFont.systemFont(ofSize: 14)
-        stateLabel.text = pullDownToRefreshText
-        addSubview(stateLabel)
-        
-        arrowImgView = UIImageView()
-        arrowImgView.image = #imageLiteral(resourceName: "arrow")
-        addSubview(arrowImgView)
-        
-        activityIndicator = UIActivityIndicatorView()
-        activityIndicator.isHidden = true
-        activityIndicator.activityIndicatorViewStyle = .gray
-        addSubview(activityIndicator)
-        
-        addConstraintForSubView()
-    }
-    
-    private func addConstraintForSubView() {
-        arrowImgView.snp.makeConstraints { (make) in
-            make.right.equalTo(stateLabel.snp.left).offset(-10)
-            make.top.equalTo(self).offset(10)
-            make.height.equalTo(40)
-            make.width.equalTo(15)
-        }
-        stateLabel.snp.makeConstraints { (make) in
-            make.centerY.equalTo(arrowImgView)
-            make.centerX.equalToSuperview()
-        }
-        activityIndicator.snp.makeConstraints { (make) in
-            make.center.equalTo(arrowImgView)
-            make.width.height.equalTo(20)
-        }
-    }
-    
     //添加oberver
     private func addoberver() {
         scrollView?.addObserver(self, forKeyPath: contentOffsetKey, options: .new, context: nil)
+        scrollView?.addObserver(self, forKeyPath: contentSizeKey, options: .new, context: nil)
         
     }
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == contentOffsetKey {
             scrollViewContentOffsetDidChange()
-        } else {
+        } else if keyPath == contentSizeKey {
+            self.frame = CGRect(x: self.frame.minX, y: self.frame.minY, width: self.scrollView!.frame.width, height: refreshHeight)
+            
+        }
+        else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
@@ -110,32 +62,6 @@ class RefreshHeader: UIView {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    func refresh(OfClosure closure: @escaping RefreshClosure) {
-        refreshClosure = closure
-    }
-    
-    func endRefresh() {
-        activityIndicator.stopAnimating()
-        activityIndicator.isHidden = true
-        arrowImgView.isHidden = false
-        arrowImgView.transform = CGAffineTransform(rotationAngle: 0)
-        state = .pullToRefresh
-        scrollView?.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
-        
-    }
-    func beginRefresh() {
-        if state == .loading {
-            return
-        }
-        state = .loading
-        
-        DispatchQueue.main.async {
-            self.scrollView?.setContentOffset(CGPoint(x: 0, y: -self.refreshHeight), animated: true)
-        }
-        
-    }
-    
     private func scrollViewContentOffsetDidChange() {
         if (scrollView?.isDragging)! {
             if state != .loading {
@@ -180,8 +106,10 @@ class RefreshHeader: UIView {
             
         case .loading:
             refreshClosure!()
-            let offset = CGPoint(x: 0, y: -refreshHeight)
-            scrollView?.setContentOffset(offset, animated: true)
+            UIView.animate(withDuration: timeInterval * 2, animations: {
+                self.scrollView?.contentInset.top = self.refreshHeight
+                
+            })
             activityIndicator.isHidden = false
             activityIndicator.startAnimating()
             arrowImgView.isHidden = true
@@ -190,5 +118,47 @@ class RefreshHeader: UIView {
     }
     
 }
+extension RefreshHeader {
+    func refresh(OfClosure closure: @escaping RefreshClosure) {
+        refreshClosure = closure
+    }
+    
+    func endRefresh() {
+        activityIndicator.stopAnimating()
+        activityIndicator.isHidden = true
+        arrowImgView.isHidden = false
+        arrowImgView.transform = CGAffineTransform(rotationAngle: 0)
+        state = .pullToRefresh
+        UIView.animate(withDuration: timeInterval * 2, animations: {
+            self.scrollView?.contentInset.top = 0
+            if let footer: RefreshFooter = self.scrollView?.refreshFooter {
+                footer.notMore = false
+                if !footer.automaticallyRefresh {
+                    self.scrollView?.contentInset.bottom = 0
+                    
+                }
+            }
+        })
+        
+        
+        
+    }
+    func beginRefresh() {
+        if state == .loading {
+            return
+        }
+        state = .loading
+        
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: timeInterval * 2, animations: {
+                self.scrollView?.contentInset.top = self.refreshHeight
+                
+            })
+        }
+        
+    }
+}
+
+
 
 

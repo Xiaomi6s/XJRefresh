@@ -8,36 +8,47 @@
 
 import UIKit
 
-class RefreshFooter: UIView {
+fileprivate let contentOffsetKey = "contentOffset"
+fileprivate let contentSizeKey = "contentSize"
+private let timeInterval = 0.25 //动画时间
 
+class RefreshFooter: ReFreshBasicView {
+    
     var pullUpToMoreText = "上拉加载更多"
     var releaseToMoreText = "松开加载更多"
     var loadingMoreText = "正在加载更多..."
-    weak var scrollView: UIScrollView? {
+    var notMoreText = "没有更多了"
+    
+    /// 是否启用到底部自动加载更多
+    var automaticallyRefresh: Bool = false {
         didSet{
-            scrollView?.addSubview(self)
+            scrollView?.contentInset.bottom = refreshHeight
+            arrowImgView.isHidden = true
+            activityIndicator.hidesWhenStopped = false
+            activityIndicator.isHidden = false
         }
     }
-    var state: RefreshState = .pullToRefresh {
+    /// 没有更多
+    var notMore: Bool = false {
+        didSet{
+            if notMore != oldValue {
+                nomoreStatehandle()
+            }
+        }
+    }
+    
+    fileprivate var state: RefreshState = .pullToRefresh {
         didSet{
             if state != oldValue {
                 stateChangeHandle()
             }
         }
     }
-    var isMore: Bool = false
-    var refreshHeight: CGFloat
-    private  var refreshClosure: RefreshClosure?
-    
-    
-    var arrowImgView: UIImageView!
-    var stateLabel: UILabel!
-    var activityIndicator: UIActivityIndicatorView!
-    
+    private  var currentOffsetY: CGFloat = 0
     override init(frame: CGRect) {
-        refreshHeight = frame.height
         super.init(frame: frame)
-        setupUI()
+        stateLabel.text = pullUpToMoreText
+        arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
     }
     deinit {
         print("deinit RefreshFooter")
@@ -51,42 +62,104 @@ class RefreshFooter: UIView {
         super.willMove(toSuperview: newSuperview)
         if newSuperview is UIScrollView {
             addObserver()
-            let ishidden = (scrollView?.contentSize.height)! > (scrollView?.frame.height)! ? false: true
-            self.isHidden = ishidden
+            self.isHidden = isHiddeFooter()
         }
     }
-   func addObserver() {
-        scrollView?.addObserver(self, forKeyPath: contentOffsetKey, options: .new, context: nil)
-        scrollView?.addObserver(self, forKeyPath: "contentSize", options: .new, context: nil)
-    }
     
+  
+    private func addObserver() {
+        scrollView?.addObserver(self, forKeyPath: contentOffsetKey, options: .new, context: nil)
+        scrollView?.addObserver(self, forKeyPath: contentSizeKey, options: .new, context: nil)
+    }
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == contentOffsetKey {
+            guard !notMore else {
+                return
+            }
             scrollViewContentOffsetDidChange()
-        } else if keyPath == "contentSize" {
-            isMore = true
-           frame = CGRect(x: 0, y: (scrollView?.contentSize.height)!, width: UIScreen.main.bounds.width, height: refreshHeight)
-            let ishidden = (scrollView?.contentSize.height)! > (scrollView?.frame.height)! ? false: true
-            self.isHidden = ishidden
+        } else if keyPath == contentSizeKey {
+            frame = CGRect(x: 0, y: (scrollView?.contentSize.height)!, width: (scrollView?.frame.width)!, height: refreshHeight)
+            isHidden = isHiddeFooter()
             
             
         } else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
+    private func scrollViewContentOffsetDidChange() {
+        let newOffsetY = (scrollView?.contentOffset.y)!
+        if (scrollView?.isDragging)! {
+            if state != .loading {
+                let offset = offsetDifference()
+                if (currentOffsetY - offset) <  refreshHeight {
+                    state = .pullToRefresh
+                    autoRefresh(newOffsetY)
+                    
+                } else {
+                    state = .releaseToRefresh
+                }
+            }
+        } else {
+            
+            if state == .releaseToRefresh {
+                state = .loading
+            }
+            
+        }
+        currentOffsetY = newOffsetY
+    }
     
-    func stateChangeHandle() {
+    /// 是否进入加载状态
+    ///
+    /// - Parameter newOffsetY: newOffsetY
+    private func autoRefresh(_ newOffsetY: CGFloat) {
+        guard automaticallyRefresh else {
+            return
+        }
+        if newOffsetY > currentOffsetY {
+            if newOffsetY >= offsetDifference() {
+                if state != .loading {
+                    state = .loading
+                }
+            }
+        }
+    }
+    
+    /// notmore状态改变
+    private func nomoreStatehandle() {
+        if notMore {
+            stateLabel.text = notMoreText
+            arrowImgView.isHidden = true
+            activityIndicator.isHidden = true
+            if !automaticallyRefresh {
+               scrollView?.contentInset.bottom = refreshHeight
+            }
+        } else {
+            state = .pullToRefresh
+            if automaticallyRefresh {
+                stateLabel.text = loadingMoreText
+                activityIndicator.isHidden = false
+            } else {
+                
+                stateLabel.text = pullUpToMoreText
+                arrowImgView.isHidden = false
+               
+            }
+        }
+    }
+    
+    /// 状态改变处理
+    private func stateChangeHandle() {
         changeTitle()
         switch state {
         case .pullToRefresh:
-            UIView.animate(withDuration: timeInterval, animations: { 
+            UIView.animate(withDuration: timeInterval, animations: {
                 self.arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
             })
         case .releaseToRefresh:
             UIView.animate(withDuration: timeInterval, animations: {
                 self.arrowImgView.transform = CGAffineTransform.identity
             })
-            isMore = false
             
         case .loading:
             refreshClosure!()
@@ -94,35 +167,21 @@ class RefreshFooter: UIView {
             arrowImgView.isHidden = true
             activityIndicator.isHidden = false
             activityIndicator.startAnimating()
-            let contentH = scrollView?.contentSize.height
-            let frameH = scrollView?.frame.height
-            let offsetH = contentH! - frameH! > 0 ? contentH! - frameH!: 0
-            let offset = CGPoint(x: 0, y: offsetH + refreshHeight)
-            scrollView?.setContentOffset(offset, animated: true)
-      
+            if !automaticallyRefresh {
+                UIView.animate(withDuration: timeInterval * 2, animations: { 
+                    self.scrollView?.contentInset.bottom = self.refreshHeight
+                })
+                
+            }
         }
     }
     
-    func endRefresh() {
-        
-        let ishidden = (scrollView?.contentSize.height)! > (scrollView?.frame.height)! ? false: true
-        self.isHidden = ishidden
-        self.arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
-        arrowImgView.isHidden = false
-        activityIndicator.isHidden = true
-        activityIndicator.stopAnimating()
-        state = .pullToRefresh
-        if isMore == false {
-            let contentH = scrollView?.contentSize.height
-            let frameH = scrollView?.frame.height
-            let offsetH = contentH! - frameH! > 0 ? contentH! - frameH!: 0
-            let offset = CGPoint(x: 0, y: offsetH)
-            scrollView?.setContentOffset(offset, animated: true)
+    /// 改变状态文字
+    private  func changeTitle() {
+        guard !automaticallyRefresh else {
+            stateLabel.text = loadingMoreText
+            return
         }
-      
-    }
-    
-    func changeTitle() {
         switch state {
         case .pullToRefresh:
             stateLabel.text = pullUpToMoreText
@@ -130,70 +189,47 @@ class RefreshFooter: UIView {
             stateLabel.text = releaseToMoreText
         case .loading:
             stateLabel.text = loadingMoreText
-       
-        }
-    }
-    
-    func scrollViewContentOffsetDidChange() {
-        print(((scrollView?.contentOffset.y)! - ((scrollView?.contentSize.height)! - (scrollView?.frame.height)!)))
-        if (scrollView?.isDragging)! {
-            if state != .loading {
-                let contentH = scrollView?.contentSize.height
-                let frameH = scrollView?.frame.height
-                let offset = contentH! - frameH! > 0 ? contentH! - frameH!: 0
-                if ((scrollView?.contentOffset.y)! - offset) <  refreshHeight {
-                    state = .pullToRefresh
-                } else {
-                    state = .releaseToRefresh
-                }
-            }
-        } else {
-            if state == .releaseToRefresh {
-                state = .loading
-            }
             
         }
     }
     
-    func setupUI() {
-        
-        stateLabel = UILabel()
-        stateLabel.font = UIFont.systemFont(ofSize: 14)
-        stateLabel.text = pullUpToMoreText
-        addSubview(stateLabel)
-        
-        arrowImgView = UIImageView()
-        arrowImgView.image = #imageLiteral(resourceName: "arrow")
-        arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
-        addSubview(arrowImgView)
-        
-        activityIndicator = UIActivityIndicatorView()
-        activityIndicator.isHidden = true
-        activityIndicator.activityIndicatorViewStyle = .gray
-        addSubview(activityIndicator)
-        
-        configConstraintForSubView()
+    //contentsize.hight与frame.hight的差值
+    private func offsetDifference() -> CGFloat {
+        let contentH = scrollView?.contentSize.height
+        let frameH = scrollView?.frame.height
+        let offset = contentH! - frameH! > 0 ? contentH! - frameH!: 0
+        return offset
     }
-    
-    func configConstraintForSubView() {
-        stateLabel.snp.makeConstraints { (make) in
-            make.centerX.equalToSuperview()
-            make.top.equalTo(20)
-        }
-        arrowImgView.snp.makeConstraints { (make) in
-            make.right.equalTo(stateLabel.snp.left).offset(-10)
-            make.centerY.equalTo(stateLabel.snp.centerY)
-        }
-        activityIndicator.snp.makeConstraints { (make) in
-            make.center.equalTo(arrowImgView)
-            make.height.equalTo(40)
-            make.width.equalTo(15)
-        }
+    //是否隐藏footer
+    fileprivate func isHiddeFooter() -> Bool {
+        return (scrollView?.contentSize.height)! > (scrollView?.frame.height)! ? false: true
     }
+}
+
+extension RefreshFooter {
     
     func refresh(OfClosure closure: @escaping RefreshClosure) {
         refreshClosure = closure
     }
     
-
+    /// 结束刷新
+    func endRefresh() {
+        isHidden = isHiddeFooter()
+        arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+        activityIndicator.stopAnimating()
+        if !notMore {
+            state = .pullToRefresh
+        }
+        if !automaticallyRefresh {
+            if !notMore {
+                arrowImgView.isHidden = false
+                activityIndicator.isHidden = true
+                self.scrollView?.contentInset.bottom = 0
+            }
+            
+        }
+       
+      
+        
+    }
 }
