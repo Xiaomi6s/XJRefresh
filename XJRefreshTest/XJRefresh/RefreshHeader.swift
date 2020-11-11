@@ -32,6 +32,8 @@ class RefreshHeader: ReFreshBasicView {
     }
     
     deinit {
+        scrollView?.removeObserver(self, forKeyPath: contentOffsetKey)
+        scrollView?.removeObserver(self, forKeyPath: contentSizeKey)
         print("RefreshHeader deinit")
         
     }
@@ -101,7 +103,7 @@ class RefreshHeader: ReFreshBasicView {
             
         case .releaseToRefresh:
             UIView.animate(withDuration: timeInterval, animations: {
-                self.arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+                self.arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
             })
             
         case .loading:

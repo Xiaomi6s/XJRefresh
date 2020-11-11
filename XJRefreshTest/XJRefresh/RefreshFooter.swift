@@ -48,9 +48,11 @@ class RefreshFooter: ReFreshBasicView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         stateLabel.text = pullUpToMoreText
-        arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+        arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
     }
     deinit {
+        scrollView?.removeObserver(self, forKeyPath: contentOffsetKey)
+        scrollView?.removeObserver(self, forKeyPath: contentSizeKey)
         print("deinit RefreshFooter")
     }
     
@@ -154,7 +156,7 @@ class RefreshFooter: ReFreshBasicView {
         switch state {
         case .pullToRefresh:
             UIView.animate(withDuration: timeInterval, animations: {
-                self.arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+                self.arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
             })
         case .releaseToRefresh:
             UIView.animate(withDuration: timeInterval, animations: {
@@ -215,7 +217,7 @@ extension RefreshFooter {
     /// 结束刷新
     func endRefresh() {
         isHidden = isHiddeFooter()
-        arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+        arrowImgView.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
         activityIndicator.stopAnimating()
         if !notMore {
             state = .pullToRefresh

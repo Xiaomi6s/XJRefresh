@@ -47,7 +47,7 @@ class NextVC: UIViewController {
         }
     }
     
-    func stopRefresh() {
+    @objc func stopRefresh() {
         var tmpList = [Int]()
         for i in 0...6 {
             tmpList.append(i)
@@ -56,7 +56,7 @@ class NextVC: UIViewController {
         tableView.reloadData()
         tableView.refreshHeader?.endRefresh()
     }
-    func footerstop() {
+    @objc func footerstop() {
         tableView.reloadData()
         tableView.refreshFooter?.endRefresh()
     }

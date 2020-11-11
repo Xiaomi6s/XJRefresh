@@ -16,7 +16,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         table.estimatedRowHeight = 50
-        table.rowHeight = UITableViewAutomaticDimension
+        table.rowHeight = UITableView.automaticDimension
         table.separatorStyle = .none
         addrefresh()
         table.refreshHeader?.beginRefresh()
@@ -74,13 +74,13 @@ class ViewController: UIViewController {
          table.refreshFooter?.automaticallyRefresh = true
     }
     
-    func stopRefresh() {
+    @objc func stopRefresh() {
         self.loadData()
        table.reloadData()
         table.refreshHeader?.endRefresh()
        
     }
-    func footerstop() {
+    @objc func footerstop() {
         self.loadMore()
         table.reloadData()
          table.refreshFooter?.endRefresh()

@@ -51,7 +51,7 @@ class ReFreshBasicView: UIView {
         
         activityIndicator = UIActivityIndicatorView()
         activityIndicator.isHidden = true
-        activityIndicator.activityIndicatorViewStyle = .gray
+        activityIndicator.style = .gray
         addSubview(activityIndicator)
         
         configConstraintForSubView()
